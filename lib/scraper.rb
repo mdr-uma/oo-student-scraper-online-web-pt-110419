@@ -43,7 +43,7 @@ class Scraper
     web_page = Nokogiri::HTML(open(profile_url))
     doc = web_page.css("div.social-icon-container").children.css("a")
     profile_links = doc.map do |links|
-      links.value
+      links.values
     end
     profile_links.flatten.each do |link|
       if link.include?("linkedin")
