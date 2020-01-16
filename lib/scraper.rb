@@ -17,39 +17,48 @@ class Scraper
           list << students
         end
         list
-        # binding.pry
-
-
   end
 
+  # def self.scrape_profile_page(profile_url)
+  #   web_page = Nokogiri::HTML(open(profile_url))
+  #
+  #   scraped_student = {}
+  #   web_page.css(".social-icon-container").each do |link|
+  #     scraped_student = {
+  #       :twitter => link.css("a")[0].attribute("href").value,
+  #       :linkedin => link.css("a")[1].attribute("href").value,
+  #       :github => link.css("a")[2].attribute("href").value,
+  #       :blog => link.css("a")[3].attribute("href").value
+  #     }
+  #   end
+  #   scraped_student[:profile_quote] = web_page.css(".main-wrapper.profile .vitals-text-container .profile-quote").text
+  #   scraped_student[:bio] = web_page.css(".main-wrapper.profile .description-holder p").text
+  #
+  #   scraped_student
+  #   # binding.pry
+  #
+  # end
   def self.scrape_profile_page(profile_url)
+    student = {}
     web_page = Nokogiri::HTML(open(profile_url))
-
-    scraped_student = {}
-    web_page.css(".social-icon-container").each do |link|
-      scraped_student = {
-        :twitter => link.css("a")[0].attribute("href").value,
-        :linkedin => link.css("a")[1].attribute("href").value,
-        :github => link.css("a")[2].attribute("href").value,
-        :blog => link.css("a")[3].attribute("href").value
-      }
+    doc = web_page.css("div.social-icon-container").children.css("a")
+    profile_links = doc.map do |links|
+      links.values
     end
-    scraped_student[:profile_quote] = web_page.css(".main-wrapper.profile .vitals-text-container .profile-quote").text
-    scraped_student[:bio] = web_page.css(".main-wrapper.profile .description-holder p").text
-
-    scraped_student
-    # binding.pry
-
+    profile_links.flatten.each do |link|
+      if link.include?("linkedin")
+        student[:linkedin] = link
+      elsif link.include?("github")
+        student[:github] = link
+      elsif link.include?("twitter")
+        student[:twitter] = link
+      else
+        student[:blog] = link
+      end
+    end
+    student[:profile_quote] = web_page.css(".profile-quote").text if web_page.css(".profile-quote")
+    student[:bio] = web_page.css("div.bio-content.content-holder div.description-holder p").text if web_page.css("div.bio-content.content-holder div.description-holder p")
+    student
   end
-
 
 end
-#  if link.include?("twitter")
-#   scraped_student[:twitter] = link.css("a")[0].attribute("href").value
-# elsif link.include?("linkedin")
-#   scraped_student[:linkedin] = link.css("a")[1].attribute("href").value
-# elsif link.include?("github")
-#   scraped_student[:github] = link.css("a")[2].attribute("href").value
-# else link.include?("blog")
-#   scraped_student[:blog] = link.css("a")[3].attribute("href").value
-# end
